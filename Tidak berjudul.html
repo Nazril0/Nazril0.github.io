@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NAZRIL GAME</title>
+  <style>
+    .fish {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      position: absolute;
+      cursor: pointer;
+    }
+
+    .fish1 {
+      background-color: red;
+    }
+
+    .fish2 {
+      background-color: red;
+    }
+
+    .fish3 {
+      background-color: red;
+    }
+
+    .fish4 {
+      background-color: red;
+    }
+
+    .bomb {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      position: absolute;
+      cursor: pointer;
+      background-color: red;
+    }
+
+    #score {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 18px;
+    }
+
+    #result {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 24px;
+      display: none;
+    }
+
+    .explosion {
+      width: 80px;
+      height: 80px;
+      position: absolute;
+      background: url('explosion.png') no-repeat center center;
+      background-size: cover;
+    }
+  </style>
+</head>
+<body>
+  <h1>NAZRIL GAME</h1>
+  <div id="score">Skor: 0</div>
+  <div id="result">Selamat, Anda Menang!</div>
+
+  <div class="fish fish1" data-score="10"></div>
+  <div class="fish fish2" data-score="-5"></div>
+  <div class="fish fish3" data-score="15"></div>
+  <div class="fish fish4" data-score="5"></div>
+  
+  <div class="bomb" data-score="-10"></div>
+  
+  <audio id="explosionSound" src="explosion.mp3"></audio>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      let score = 0;
+      const scoreDisplay = document.getElementById('score');
+      const resultDisplay = document.getElementById('result');
+      const fishes = document.querySelectorAll('.fish');
+      const bomb = document.querySelector('.bomb');
+      const explosionSound = document.getElementById('explosionSound');
+      
+      fishes.forEach(fish => {
+        fish.addEventListener('click', function () {
+          const fishScore = parseInt(fish.getAttribute('data-score'));
+          score += fishScore;
+          updateScore();
+          checkWin();
+          resetFishPosition(fish);
+        });
+      });
+
+      bomb.addEventListener('click', function () {
+        handleBombClick();
+      });
+
+      function updateScore() {
+        scoreDisplay.textContent = `Skor: ${score}`;
+      }
+
+      function checkWin() {
+        if (score >= 150) {
+          resultDisplay.textContent = 'Selamat, Anda Menang!';
+          resultDisplay.style.display = 'block';
+          redirectToWebsite();
+        }
+      }
+
+      function checkLose() {
+        resultDisplay.textContent = 'Anda kalah';
+        resultDisplay.style.display = 'block';
+      }
+
+      function resetFishPosition(fish) {
+        const maxX = window.innerWidth - fish.clientWidth;
+        const maxY = window.innerHeight - fish.clientHeight;
+        
+        const randomX = Math.floor(Math.random() * maxX);
+        const randomY = Math.floor(Math.random() * maxY);
+        
+        fish.style.left = randomX + 'px';
+        fish.style.top = randomY + 'px';
+      }
+
+      function shuffleFish() {
+        fishes.forEach(fish => {
+          resetFishPosition(fish);
+        });
+      }
+
+      function handleBombClick() {
+        showExplosionEffect(bomb);
+        playExplosionSound();
+        score += parseInt(bomb.getAttribute('data-score'));
+        updateScore();
+        checkWin();
+        checkLose(); // Tambahkan cek kehilangan saat mengklik bom
+        setTimeout(() => {
+          restartGame();
+        }, 500);
+      }
+
+      function showExplosionEffect(element) {
+        const explosionEffect = document.createElement('div');
+        explosionEffect.classList.add('explosion');
+        element.parentElement.appendChild(explosionEffect);
+
+        const rect = element.getBoundingClientRect();
+        explosionEffect.style.left = rect.left + 'px';
+        explosionEffect.style.top = rect.top + 'px';
+
+        setTimeout(() => {
+          explosionEffect.remove();
+          resetFishPosition(element);
+        }, 500);
+      }
+
+      function playExplosionSound() {
+        explosionSound.currentTime = 0;
+        explosionSound.play();
+      }
+
+      function restartGame() {
+        score = 0;
+        updateScore();
+        checkWin();
+        shuffleFish();
+        resultDisplay.style.display = 'none';
+      }
+
+      function redirectToWebsite() {
+        // Gantilah "https://example.com" dengan URL situs web yang diinginkan
+        window.location.href = "https://example.com";
+      }
+
+      shuffleFish(); // Set posisi awal ikan
+      updateScore();
+
+      // Set interval untuk mengganti posisi ikan setiap 4 detik
+      setInterval(shuffleFish, 4000);
+
+      // Set interval untuk mengganti posisi bomb setiap 4 detik
+      setInterval(() => {
+        resetFishPosition(bomb);
+      }, 4000);
+    });
+  </script>
+</body>
+</html>
